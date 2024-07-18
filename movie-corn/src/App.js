@@ -59,9 +59,7 @@ export default function App() {
         <NumResult movies={movies} />
       </NavBar>
       <MainComponent>
-        <FirstBoxComponent>
-          <ListMovie movies={movies} />
-        </FirstBoxComponent>
+        <FirstBoxComponent></FirstBoxComponent>
         <SecondBoxComponent />
       </MainComponent>
     </>
