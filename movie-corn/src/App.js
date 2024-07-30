@@ -55,11 +55,33 @@ const KEY = "fc30ab42";
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("Something is wrong");
 
   useEffect(function () {
-    fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.Search));
+    async function fetchMovieData() {
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch movies data");
+        }
+
+        const data = await response.json();
+        if (data.Response === "False") throw new Error("Movie not found");
+        setMovies(data.Search);
+        setIsLoading(false);
+      } catch (err) {
+        console.log(err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchMovieData();
   }, []);
 
   return (
@@ -70,11 +92,25 @@ export default function App() {
       </NavBar>
       <MainComponent>
         <FirstBoxComponent>
-          <ListMovie movies={movies} />
+          {isLoading && <Loader />}
+          {isLoading && !error && <ListMovie movies={movies} />}
+          {error && <ErrorComponent message={error} />}
         </FirstBoxComponent>
         <SecondBoxComponent />
       </MainComponent>
     </>
+  );
+}
+
+function Loader() {
+  return <p className="loader">Loading</p>;
+}
+
+function ErrorComponent({ message }) {
+  return (
+    <p className="error">
+      <span>{message}</span>
+    </p>
   );
 }
 
